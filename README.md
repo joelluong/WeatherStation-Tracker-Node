@@ -4,7 +4,7 @@
 
 ## Project Description
 
-This project displays weather stations as markers on a map using a .NET Core API and a React TypeScript frontend. Users can view detailed information about each weather station by interacting with the map markers.
+This project displays weather stations as markers on a map using a Node.js and a React TypeScript frontend. Users can view detailed information about each weather station by interacting with the map markers.
 
 ### Results:
 1. **Weather Stations Displayed as Markers on Google Maps**  
