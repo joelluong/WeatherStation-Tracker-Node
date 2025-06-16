@@ -1,0 +1,322 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Weather Stations API",
+    "description": "Express API for managing weather stations with PostgreSQL",
+    "version": "1.0.0"
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Health check endpoints"
+    },
+    {
+      "name": "Weather Stations",
+      "description": "Weather station management endpoints"
+    },
+    {
+      "name": "Measurements",
+      "description": "Weather measurement data endpoints"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/health/": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health check endpoint",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/weather-stations/": {
+      "get": {
+        "tags": [
+          "Weather Stations"
+        ],
+        "summary": "Get all weather stations",
+        "description": "",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "description": "Filter by state",
+            "type": "string"
+          },
+          {
+            "name": "portfolio",
+            "in": "query",
+            "description": "Filter by portfolio",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/weather-stations/{id}": {
+      "get": {
+        "tags": [
+          "Weather Stations"
+        ],
+        "summary": "Get weather station by ID",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/measurements/station/{stationId}": {
+      "get": {
+        "tags": [
+          "Measurements"
+        ],
+        "summary": "Get all measurements for a weather station grouped by measurement name",
+        "description": "",
+        "parameters": [
+          {
+            "name": "stationId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/measurements/variables": {
+      "get": {
+        "tags": [
+          "Measurements"
+        ],
+        "summary": "Get all measurement variables",
+        "description": "",
+        "parameters": [
+          {
+            "name": "weather_station_id",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "WeatherStation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 1
+        },
+        "name": {
+          "type": "string",
+          "example": "Cohuna North"
+        },
+        "site": {
+          "type": "string",
+          "example": "Cohuna Solar Farm"
+        },
+        "portfolio": {
+          "type": "string",
+          "example": "Enel Green Power"
+        },
+        "state": {
+          "type": "string",
+          "example": "VIC"
+        },
+        "latitude": {
+          "type": "number",
+          "example": -35.882762
+        },
+        "longitude": {
+          "type": "number",
+          "example": 144.217208
+        }
+      }
+    },
+    "MeasurementVariable": {
+      "type": "object",
+      "properties": {
+        "varId": {
+          "type": "number",
+          "example": 11
+        },
+        "weatherStationId": {
+          "type": "number",
+          "example": 1
+        },
+        "name": {
+          "type": "string",
+          "example": "AirT_inst"
+        },
+        "unit": {
+          "type": "string",
+          "example": "Deg C"
+        },
+        "longName": {
+          "type": "string",
+          "example": "Air Temperature"
+        }
+      }
+    },
+    "Measurement": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "example": 1
+        },
+        "weatherStationId": {
+          "type": "number",
+          "example": 1
+        },
+        "timestamp": {
+          "type": "string",
+          "example": "2023-08-29T06:00:00.000Z"
+        },
+        "values": {
+          "type": "object",
+          "properties": {
+            "11": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "example": 17.09
+                },
+                "var_name": {
+                  "type": "string",
+                  "example": "AirT_inst"
+                },
+                "unit": {
+                  "type": "string",
+                  "example": "Deg C"
+                },
+                "long_name": {
+                  "type": "string",
+                  "example": "Air Temperature"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ImportRequest": {
+      "type": "object",
+      "properties": {
+        "filePath": {
+          "type": "string",
+          "example": "/path/to/csv/file.csv"
+        }
+      }
+    },
+    "SuccessResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "data": {
+          "type": "object",
+          "properties": {}
+        },
+        "count": {
+          "type": "number",
+          "example": 0
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": false
+        },
+        "error": {
+          "type": "string",
+          "example": "Error message"
+        },
+        "message": {
+          "type": "string",
+          "example": "Detailed error message"
+        }
+      }
+    },
+    "ImportResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "example": true
+        },
+        "message": {
+          "type": "string",
+          "example": "Successfully imported X records"
+        },
+        "imported": {
+          "type": "number",
+          "example": 10
+        },
+        "errors": {
+          "type": "array",
+          "example": [],
+          "items": {}
+        }
+      }
+    }
+  }
+}

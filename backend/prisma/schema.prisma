@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Weather Station model
+model WeatherStation {
+  id        Int      @id
+  name      String   @unique
+  site      String
+  portfolio String
+  state     String
+  latitude  Float
+  longitude Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  weatherData     WeatherData[]
+  measurementData MeasurementData[]
+
+  @@index([state])
+  @@index([latitude, longitude])
+  @@map("weather_stations")
+}
+
+// Weather Data model
+model WeatherData {
+  varId            Int      @id @map("var_id")
+  weatherStationId Int      @map("weather_station_id")
+  name             String   @db.VarChar(50)
+  unit             String   @db.VarChar(20)
+  longName         String   @map("long_name") @db.VarChar(100)
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  weatherStation WeatherStation @relation(fields: [weatherStationId], references: [id], onDelete: Cascade)
+  // measurementValues MeasurementValue[]
+
+  @@unique([weatherStationId, name])
+  @@index([weatherStationId])
+  @@map("weather_data")
+}
+
+// Measurement Data model
+model MeasurementData {
+  id               Int      @id @default(autoincrement())
+  weatherStationId Int      @map("weather_station_id")
+  value            Decimal  @db.Decimal(10, 4)
+  weatherDataName  String   @map("weather_data_name")
+  timestamp        DateTime
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  weatherStation WeatherStation @relation(fields: [weatherStationId], references: [id], onDelete: Cascade)
+  // measurementValues MeasurementValue[]
+
+  // @@unique([weatherStationId, timestamp])
+  @@index([weatherStationId, timestamp(sort: Desc)])
+  @@map("measurement_data")
+}
+
+// Measurement Values model
+// model MeasurementValue {
+//   id            Int      @id @default(autoincrement())
+//   measurementId Int      @map("measurement_id")
+//   varId         Int      @map("var_id")
+//   value         Decimal? @db.Decimal(10, 4)
+//   createdAt     DateTime @default(now()) @map("created_at")
+
+//   measurement MeasurementData @relation(fields: [measurementId], references: [id], onDelete: Cascade)
+//   variable    WeatherData     @relation(fields: [varId], references: [varId], onDelete: Cascade)
+
+//   @@unique([measurementId, varId])
+//   @@index([varId])
+//   @@index([measurementId])
+//   @@map("measurement_values")
+// }
