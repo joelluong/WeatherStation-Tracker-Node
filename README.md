@@ -45,7 +45,11 @@ The client fetches data from the API and renders it as markers on a Mapbox-power
 ### API Setup
 
 1. Ensure Node.js 22.12.0 or later is installed on your machine.
-2. Install MySQL locally. You can use **DBngin** for installation and **DBeaver** to manage and access the database.
+2. Install MySQL locally. You can use **DBngin** for installation and **DBeaver** to manage and access the database. If the database is not created successfully, try connecting to MySQL manually via Terminal and create it yourself:
+   ```bash
+   mysql -h 127.0.0.1 -P 3306 -u root -p
+   SHOW DATABASES;
+   CREATE DATABASE proadb;
 3. Navigate to the `/backend` folder.
 4. Run the following commands to install dependencies and seed data from the CSV files into the MySQL database:
    ```bash
@@ -71,12 +75,12 @@ The client fetches data from the API and renders it as markers on a Mapbox-power
 1. **Incorrect location of Parkes East**
    ![image4](https://github.com/user-attachments/assets/6a6b0f49-6893-493a-ba53-541c45677455)
 
-   The coordinates listed for Parkes East (33.110485, 148.101728) incorrectly place it near the Sea of Japan, which is clearly not accurate. Based on its name, Parkes East should be located east of Parkes North and Parkes South.
+   The coordinates listed for Parkes East (33.110485, 148.101728) incorrectly place it near the Sea of Japan, which is clearly not accurate.
    ![image5](https://github.com/user-attachments/assets/26cb2faf-080c-4d3f-92f1-be2a70d0b7c3)
 
-   To correct this, I updated the coordinates to **-33.1050678, 148.0806473**, which corresponds to the **Goonumbla Solar Farm**—a photovoltaic power plant—referenced here: [Goonumbla Solar Farm - Google Maps](https://maps.app.goo.gl/jUP3AJE5mnkKmvck7)
+   To correct this, I believe the latitude should be negative. I’ve manually updated the database to use -33.110485, which aligns with a location to the east of Parkes, as expected. Interestingly, based on Google Maps, this location may correspond to the **Goonumbla Solar Farm** — a photovoltaic power plant — as referenced here: [Goonumbla Solar Farm - Google Maps](https://maps.app.goo.gl/jUP3AJE5mnkKmvck7)
 
-2. **Unknow measurement unit for Bungala 1 West**
+2. **Unknown measurement unit for Bungala 1 West**
    
    The variable names used in `variables.csv` (which is `AirT_inst` and `GHI_inst`) do not match the ones used in `data_2.csv` (which is `avg_Wm2`, `avg_airTemp`).
    

@@ -37,7 +37,7 @@ const MapView: React.FC = () => {
   const [viewport, setViewport] = useState<ViewState>({
     latitude: -25.2744, // Center of Australia
     longitude: 133.7751,
-    zoom: 7,
+    zoom: 4,
     bearing: 0,
     pitch: 0,
     padding: { top: 0, bottom: 0, left: 0, right: 0 },
