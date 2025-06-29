@@ -10,8 +10,13 @@ This project displays weather stations as markers on a map using a Node.js and a
 1. **Weather Stations Displayed as Markers on Google Maps**  
    ![image](https://github.com/user-attachments/assets/e431ac4a-ba93-40e9-968b-0fe1c9ef7715)
 
-2. **Detailed Weather Station Dialog**  
-   ![image](https://github.com/user-attachments/assets/3fe8de7a-6e37-4fb2-819c-2f6dcb3d51b1)
+2. **Detailed Weather Station Dialog**: Displays full details of a selected weather station.
+
+   A. **Chart View**
+   ![image](https://github.com/user-attachments/assets/156f1e0a-1644-41d1-8448-e4bc284f87c2)
+
+   B. **Table View**  
+   ![image](https://github.com/user-attachments/assets/4ecb5279-f30b-4a96-9b83-e75ad0a43afe)
 
 ---
 
