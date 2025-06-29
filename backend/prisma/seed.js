@@ -9,19 +9,23 @@ async function main() {
 
     try {
         // Import weather stations
-        console.log("Importing weather stations...");
         const weatherStationResult = await WeatherStationLoader.loadSampleData();
         console.log(`✓ Imported ${weatherStationResult.imported} weather stations`);
+        if (weatherStationResult.skipped > 0) {
+            console.log(`✓ Skipped ${weatherStationResult.skipped} existing weather stations`);
+        }
 
         if (weatherStationResult.errors.length > 0) {
             console.warn("Weather station import errors:", weatherStationResult.errors);
         }
 
         // Import all measurement data
-        console.log("Importing measurement data...");
         const measurementResult = await MeasurementLoader.loadAllMeasurements();
         console.log(`✓ Imported ${measurementResult.variables.imported} measurement variables`);
         console.log(`✓ Imported ${measurementResult.measurements.imported} measurements`);
+        if (measurementResult.measurements.skipped > 0) {
+            console.log(`✓ Skipped ${measurementResult.measurements.skipped} existing measurements`);
+        }
 
         if (measurementResult.variables.errors.length > 0) {
             console.warn("Measurement variables import errors:", measurementResult.variables.errors);

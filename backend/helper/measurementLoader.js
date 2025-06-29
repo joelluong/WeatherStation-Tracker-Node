@@ -83,8 +83,9 @@ class MeasurementLoader {
                     try {
                         const result = await MeasurementData.bulkCreate(measurements);
                         resolve({
-                            imported: result.length || measurements.length,
-                            errors,
+                            imported: result.imported,
+                            skipped: result.skipped || 0,
+                            errors: [...errors, ...result.errors],
                         });
                     } catch (error) {
                         reject(error);
@@ -97,7 +98,7 @@ class MeasurementLoader {
     static async loadAllMeasurements() {
         const results = {
             variables: { imported: 0, errors: [] },
-            measurements: { imported: 0, errors: [] },
+            measurements: { imported: 0, skipped: 0, errors: [] },
         };
 
         try {
@@ -108,6 +109,7 @@ class MeasurementLoader {
                     const stationResult = await this.loadMeasurementsForStation(stationId);
 
                     results.measurements.imported += stationResult.imported;
+                    results.measurements.skipped += stationResult.skipped || 0;
                     results.measurements.errors.push(...stationResult.errors);
                 } catch (error) {
                     results.measurements.errors.push({

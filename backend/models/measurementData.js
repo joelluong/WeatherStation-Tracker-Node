@@ -60,11 +60,35 @@ class MeasurementData {
 
     static async bulkCreate(measurements) {
         let imported = 0;
+        let skipped = 0;
         const errors = [];
 
         for (const measurement of measurements) {
             try {
-                // Create new measurement
+                // Round the value to 2 decimal places for comparison
+                const roundedValue = Math.round(measurement.value * 100) / 100;
+
+                // Check if measurement already exists with value comparison to 2 decimal places
+                const existingRecords = await prisma.measurementData.findMany({
+                    where: {
+                        weatherStationId: measurement.weatherStationId,
+                        weatherDataName: measurement.weatherDataName,
+                        timestamp: new Date(measurement.timestamp),
+                    },
+                });
+
+                // Check if any existing record has the same value when rounded to 2 decimal places
+                const existing = existingRecords.some((record) => {
+                    const existingRoundedValue = Math.round(parseFloat(record.value) * 100) / 100;
+                    return existingRoundedValue === roundedValue;
+                });
+
+                if (existing) {
+                    skipped++;
+                    continue;
+                }
+
+                // Create new measurement only if it doesn't exist
                 await prisma.measurementData.create({
                     data: {
                         weatherStationId: measurement.weatherStationId,
@@ -83,7 +107,7 @@ class MeasurementData {
             }
         }
 
-        return { imported, errors };
+        return { imported, skipped, errors };
     }
 }
 

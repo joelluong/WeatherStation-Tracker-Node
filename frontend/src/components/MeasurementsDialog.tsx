@@ -17,9 +17,11 @@ import {
   Alert,
   Tabs,
   Tab,
-  Divider,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
-import { Close } from "@mui/icons-material";
+import { Close, TableChart, ShowChart } from "@mui/icons-material";
+import { LineChart } from "@mui/x-charts/LineChart";
 import type { WeatherStation } from "../types/weatherStation";
 import type { MeasurementGroup } from "../interface/measurement";
 import { getStationMeasurements } from "../services/api";
@@ -47,7 +49,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`measurement-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+      {value === index && <Box sx={{ py: 2 }}>{children}</Box>}
     </div>
   );
 }
@@ -60,6 +62,7 @@ const MeasurementsDialog: React.FC<StationDetailsDialogProps> = ({
   const [measurements, setMeasurements] = useState<MeasurementGroup[]>();
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [viewMode, setViewMode] = useState<"table" | "chart">("table");
 
   useEffect(() => {
     if (open && station) {
@@ -83,7 +86,7 @@ const MeasurementsDialog: React.FC<StationDetailsDialogProps> = ({
     }
   };
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
@@ -95,6 +98,15 @@ const MeasurementsDialog: React.FC<StationDetailsDialogProps> = ({
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const handleViewModeChange = (
+    _event: React.MouseEvent<HTMLElement>,
+    newMode: "table" | "chart" | null
+  ) => {
+    if (newMode !== null) {
+      setViewMode(newMode);
+    }
   };
 
   if (!station) return null;
@@ -141,9 +153,6 @@ const MeasurementsDialog: React.FC<StationDetailsDialogProps> = ({
                         <Typography variant="body2">
                           {data.long_name}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {data.unit}
-                        </Typography>
                       </Box>
                     }
                     id={`measurement-tab-${index}`}
@@ -158,7 +167,7 @@ const MeasurementsDialog: React.FC<StationDetailsDialogProps> = ({
               return (
                 <TabPanel key={table_data.name} value={tabValue} index={index}>
                   <Box>
-                    <Typography variant="h6" gutterBottom>
+                    <Typography variant="h6">
                       {table_data.long_name} ({table_data.unit})
                     </Typography>
                     <Typography
@@ -169,35 +178,102 @@ const MeasurementsDialog: React.FC<StationDetailsDialogProps> = ({
                       Variable: {table_data.name}
                     </Typography>
 
-                    <Divider sx={{ my: 2 }} />
+                    <Box sx={{ my: 2 }}>
+                      <ToggleButtonGroup
+                        value={viewMode}
+                        exclusive
+                        onChange={handleViewModeChange}
+                        aria-label="view mode"
+                        size="small"
+                      >
+                        <ToggleButton value="table" aria-label="table view">
+                          <TableChart sx={{ mr: 1 }} />
+                          Table
+                        </ToggleButton>
+                        <ToggleButton value="chart" aria-label="chart view">
+                          <ShowChart sx={{ mr: 1 }} />
+                          Chart
+                        </ToggleButton>
+                      </ToggleButtonGroup>
+                    </Box>
 
                     {measurement.length > 0 ? (
-                      <TableContainer component={Paper} variant="outlined">
-                        <Table size="small">
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>Timestamp</TableCell>
-                              <TableCell align="right">Value</TableCell>
-                              <TableCell align="right">Unit</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {measurement.map((row_data) => (
-                              <TableRow key={row_data.id}>
-                                <TableCell>
-                                  {formatDate(row_data.timestamp)}
-                                </TableCell>
-                                <TableCell align="right">
-                                  {row_data.value.toFixed(2)}
-                                </TableCell>
-                                <TableCell align="right">
-                                  {table_data.unit}
-                                </TableCell>
+                      viewMode === "table" ? (
+                        <TableContainer component={Paper} variant="outlined">
+                          <Table size="small">
+                            <TableHead>
+                              <TableRow>
+                                <TableCell>Timestamp</TableCell>
+                                <TableCell align="right">Value</TableCell>
+                                <TableCell align="right">Unit</TableCell>
                               </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
+                            </TableHead>
+                            <TableBody>
+                              {measurement.map((row_data) => (
+                                <TableRow key={row_data.id}>
+                                  <TableCell>
+                                    {formatDate(row_data.timestamp)}
+                                  </TableCell>
+                                  <TableCell align="right">
+                                    {row_data.value.toFixed(2)}
+                                  </TableCell>
+                                  <TableCell align="right">
+                                    {table_data.unit}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      ) : (
+                        <Box sx={{ width: "100%", height: 400 }}>
+                          {/* Data from API is from latest -> sooner, so need to reverse to display correct data */}
+                          <LineChart
+                            dataset={measurement
+                              .map((d) => ({
+                                timestamp: new Date(d.timestamp),
+                                value: d.value,
+                                id: d.id,
+                              }))
+                              .reverse()}
+                            xAxis={[
+                              {
+                                dataKey: "timestamp",
+                                scaleType: "time",
+                                valueFormatter: (value) => {
+                                  const date = new Date(value);
+                                  return date.toLocaleString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  });
+                                },
+                                // reverse: true,
+                              },
+                            ]}
+                            series={[
+                              {
+                                dataKey: "value",
+                                label: `${table_data.long_name}`,
+                                color: "#1976d2",
+                                showMark: true,
+                                curve: "linear",
+                                valueFormatter: (value) =>
+                                  `${value?.toFixed(2)} ${table_data.unit}`,
+                              },
+                            ]}
+                            height={400}
+                            margin={{
+                              left: 70,
+                              right: 30,
+                              top: 30,
+                              bottom: 70,
+                            }}
+                            grid={{ horizontal: true, vertical: true }}
+                          />
+                        </Box>
+                      )
                     ) : (
                       <Alert severity="info">
                         No data points available for this measurement.

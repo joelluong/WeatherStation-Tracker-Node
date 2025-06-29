@@ -38,8 +38,9 @@ class WeatherStationLoader {
                         const results = await WeatherStation.bulkCreate(weatherStations);
                         resolve({
                             success: true,
-                            imported: results.length,
-                            errors: errors,
+                            imported: results.imported,
+                            skipped: weatherStations.length - results.imported,
+                            errors: [...errors, ...results.errors],
                             data: results,
                         });
                     } catch (error) {
