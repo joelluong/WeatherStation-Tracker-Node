@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Box,
   Paper,
@@ -10,8 +10,14 @@ import {
 import SearchFilter from "../components/SearchFilter";
 import StationList from "../components/StationList";
 import MeasurementsDialog from "../components/MeasurementsDialog";
+import ClusterMarker from "../components/ClusterMarker";
 import type { WeatherStation } from "../types/weatherStation";
 import { getWeatherStations } from "../services/api";
+import {
+  clusterMarkers,
+  isCluster,
+  type Cluster,
+} from "../utils/markerCluster";
 import ReactMapGL, {
   Marker,
   Popup,
@@ -43,6 +49,11 @@ const MapView: React.FC = () => {
     padding: { top: 0, bottom: 0, left: 0, right: 0 },
   });
 
+  // Compute clusters based on current zoom level
+  const clusteredMarkers = useMemo(() => {
+    return clusterMarkers(weatherStations, viewport.zoom);
+  }, [weatherStations, viewport.zoom]);
+
   const handleStationClick = (station: WeatherStation) => {
     setSelectedStation(station);
     setShowPin(true);
@@ -59,6 +70,25 @@ const MapView: React.FC = () => {
     event.originalEvent.stopPropagation();
     setSelectedStation(station);
     setShowPin(true);
+  };
+
+  const onClusterClick = (event: MarkerEvent<MouseEvent>, cluster: Cluster) => {
+    event.originalEvent.stopPropagation();
+
+    // Calculate bounds of all stations in cluster
+    const latitudes = cluster.stations.map((s) => s.latitude);
+    const longitudes = cluster.stations.map((s) => s.longitude);
+
+    const bounds: [[number, number], [number, number]] = [
+      [Math.min(...longitudes), Math.min(...latitudes)],
+      [Math.max(...longitudes), Math.max(...latitudes)],
+    ];
+
+    // Zoom to fit all stations in cluster
+    mapRef.current?.fitBounds(bounds, {
+      padding: 100,
+      duration: 1000,
+    });
   };
 
   useEffect(() => {
@@ -145,21 +175,40 @@ const MapView: React.FC = () => {
           style={{ width: "100%", height: "100vh" }}
           onMove={(evt) => setViewport(evt.viewState)}
         >
-          {weatherStations.map((station) => (
-            <Marker
-              latitude={station.latitude}
-              longitude={station.longitude}
-              anchor="bottom"
-              onClick={(e) => onMarkerClick(e, station)}
-            >
-              <LocationOn
-                sx={{
-                  fontSize: 40,
-                  color: "#f63b3b",
-                }}
-              />
-            </Marker>
-          ))}
+          {clusteredMarkers.map((item) => {
+            if (isCluster(item)) {
+              // Render cluster marker
+              return (
+                <Marker
+                  key={item.id}
+                  latitude={item.latitude}
+                  longitude={item.longitude}
+                  anchor="bottom"
+                  onClick={(e) => onClusterClick(e, item)}
+                >
+                  <ClusterMarker count={item.count} />
+                </Marker>
+              );
+            } else {
+              // Render individual station marker
+              return (
+                <Marker
+                  key={`station-${item.id}`}
+                  latitude={item.latitude}
+                  longitude={item.longitude}
+                  anchor="bottom"
+                  onClick={(e) => onMarkerClick(e, item)}
+                >
+                  <LocationOn
+                    sx={{
+                      fontSize: 40,
+                      color: "#f63b3b",
+                    }}
+                  />
+                </Marker>
+              );
+            }
+          })}
 
           {showPin && selectedStation && (
             <Popup
