@@ -7,11 +7,14 @@
 This project displays weather stations as markers on a map using a Node.js and a React TypeScript frontend. Users can view detailed information about each weather station by interacting with the map markers.
 
 ### Results:
-1. **Weather Stations Displayed as Markers on Google Maps**  
-   ![image](https://github.com/user-attachments/assets/e431ac4a-ba93-40e9-968b-0fe1c9ef7715)
+1. **Weather Stations Displayed as Markers on Mapbox:**
+   Includes an additional feature to display the number of weather stations as clusters when they are close to each other. As users zoom in, the clusters break apart to show individual stations.
+   ![image](https://github.com/user-attachments/assets/9b02d315-79db-4c96-a71c-025b3f66a478)
+
+   ![image](https://github.com/user-attachments/assets/71dbe973-1639-42ac-b8b5-478aff9f3163)
+
 
 2. **Detailed Weather Station Dialog**: Displays full details of a selected weather station.
-
    A. **Chart View**
    ![image](https://github.com/user-attachments/assets/156f1e0a-1644-41d1-8448-e4bc284f87c2)
 
